@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Informasi Peminjaman Alat - UKK RPL 2025/2026 (Rust Backend)</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ========================================================================
+       TOP HEADER
+       ======================================================================== -->
+  <header class="app-header" id="appHeader">
+    <div class="brand-container">
+      <div class="brand-logo" id="brandLogo">⚙️</div>
+      <div class="brand-info">
+        <h1 id="appTitle">SIM Peminjaman Alat</h1>
+        <span id="appSub">UKK RPL 2025/2026 • Powered by Rust & Axum</span>
+      </div>
+    </div>
+
+    <!-- Quick Role Switcher for Exam Demonstrations -->
+    <div class="header-actions">
+      <div class="quick-roles" title="Pilih akun simulasi peran UKK untuk demo instan">
+        <span style="font-size: 0.7rem; color: var(--text-muted); padding-left: 8px; margin-right: 4px;">Akun Uji:</span>
+        <button class="quick-role-btn active" id="btnRoleAdmin" onclick="quickLogin('admin', 'admin123')">Admin</button>
+        <button class="quick-role-btn" id="btnRolePetugas" onclick="quickLogin('petugas', 'petugas123')">Petugas</button>
+        <button class="quick-role-btn" id="btnRolePeminjam" onclick="quickLogin('peminjam', 'peminjam123')">Peminjam</button>
+      </div>
+
+      <button class="btn btn-outline btn-sm" id="btnThemeToggle" onclick="toggleTheme()" title="Ubah Tema Gelap/Terang">🌓</button>
+
+      <div class="user-badge-container" id="userBadgeContainer">
+        <div class="user-avatar" id="userAvatar">A</div>
+        <div class="user-details">
+          <span class="name" id="userNameDisplay">Administrator</span>
+          <span class="role-tag admin" id="userRoleTag">ADMIN</span>
+        </div>
+      </div>
+
+      <button class="btn btn-outline btn-sm" id="btnLogout" onclick="logout()">Keluar</button>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       APPLICATION LAYOUT CONTAINER
+       ======================================================================== -->
+  <div class="app-container" id="appContainer">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" id="appSidebar">
+      <div class="nav-section-title">Menu Utama</div>
+      <a class="nav-item active" id="navDashboard" onclick="switchView('dashboard')">
+        <span class="icon">📊</span>
+        <span>Dashboard</span>
+      </a>
+      <a class="nav-item" id="navKatalog" onclick="switchView('katalog')">
+        <span class="icon">🔍</span>
+        <span>Katalog Alat</span>
+      </a>
+
+      <!-- Menu Khusus Peminjam -->
+      <div class="role-peminjam-menu" id="menuPeminjamOnly">
+        <div class="nav-section-title">Peminjaman</div>
+        <a class="nav-item" id="navAjukanPinjam" onclick="openAjukanModal()">
+          <span class="icon">📝</span>
+          <span>Ajukan Peminjaman</span>
+        </a>
+        <a class="nav-item" id="navRiwayatPeminjam" onclick="switchView('peminjaman')">
+          <span class="icon">📋</span>
+          <span>Riwayat Pinjam Saya</span>
+        </a>
+      </div>
+
+      <!-- Menu Petugas & Admin -->
+      <div class="role-staff-menu" id="menuStaffOnly">
+        <div class="nav-section-title">Manajemen Transaksi</div>
+        <a class="nav-item" id="navApproval" onclick="switchView('approval')">
+          <span class="icon">⏳</span>
+          <span>Approval Peminjaman</span>
+          <span class="nav-badge" id="badgePendingCount" style="display:none;">0</span>
+        </a>
+        <a class="nav-item" id="navSemuaPeminjaman" onclick="switchView('peminjaman')">
+          <span class="icon">📑</span>
+          <span>Data Peminjaman</span>
+        </a>
+        <a class="nav-item" id="navPengembalian" onclick="switchView('pengembalian')">
+          <span class="icon">🔄</span>
+          <span>Pengembalian & Denda</span>
+        </a>
+
+        <div class="nav-section-title">Master Data</div>
+        <a class="nav-item" id="navKelolaAlat" onclick="switchView('kelola_alat')">
+          <span class="icon">🛠️</span>
+          <span>Kelola Alat</span>
+        </a>
+        <a class="nav-item" id="navKelolaKategori" onclick="switchView('kelola_kategori')">
+          <span class="icon">🏷️</span>
+          <span>Kategori Alat</span>
+        </a>
+      </div>
+
+      <!-- Menu Khusus Admin -->
+      <div class="role-admin-menu" id="menuAdminOnly">
+        <div class="nav-section-title">Administrasi Sistem</div>
+        <a class="nav-item" id="navKelolaUser" onclick="switchView('kelola_user')">
+          <span class="icon">👥</span>
+          <span>Kelola Pengguna</span>
+        </a>
+        <a class="nav-item" id="navLogAktivitas" onclick="switchView('logs')">
+          <span class="icon">📜</span>
+          <span>Log Aktivitas</span>
+        </a>
+      </div>
+
+      <!-- Menu Laporan (Petugas & Admin) -->
+      <div class="role-report-menu" id="menuReportOnly">
+        <div class="nav-section-title">Laporan</div>
+        <a class="nav-item" id="navCetakLaporan" onclick="switchView('laporan')">
+          <span class="icon">🖨️</span>
+          <span>Cetak Laporan UKK</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main" id="appMain">
+
+      <!-- Formal UKK Letterhead (Displayed strictly when printing) -->
+      <div class="report-letterhead" id="printLetterhead">
+        <h2>SMK NEGERI CONTOH KOTA</h2>
+        <h3>KOMPETENSI KEAHLIAN REKAYASA PERANGKAT LUNAK</h3>
+        <p>Jl. Pendidikan Teknologi Kejuruan No. 1 • Telp: (021) 1234567 • Email: rpl@smk.sch.id</p>
+        <p style="font-weight: bold; margin-top: 5px;">LAPORAN REKAPITULASI PEMINJAMAN & PENGEMBALIAN ALAT LABORATORIUM</p>
+      </div>
+
+      <!-- VIEW 1: DASHBOARD -->
+      <section class="view-section" id="viewDashboard">
+        <div class="page-header">
+          <div>
+            <h2 id="dashWelcome">Ringkasan Dashboard</h2>
+            <p>Statistik real-time peminjaman, ketersediaan inventaris, dan audit operasional</p>
+          </div>
+          <button class="btn btn-primary" id="btnQuickAction" onclick="handleDashboardQuickAction()">+ Aksi Cepat</button>
+        </div>
+
+        <div class="stats-grid" id="statsContainer">
+          <div class="stat-card cyan">
+            <div class="stat-header"><span>Total Jenis Alat</span><span>📦</span></div>
+            <div class="stat-value" id="statTotalAlat">0</div>
+            <div class="stat-desc">Unit inventaris terdaftar</div>
+          </div>
+          <div class="stat-card emerald">
+            <div class="stat-header"><span>Stok Siap Pakai</span><span>✅</span></div>
+            <div class="stat-value" id="statTotalTersedia">0</div>
+            <div class="stat-desc">Unit alat tersedia saat ini</div>
+          </div>
+          <div class="stat-card amber">
+            <div class="stat-header"><span>Sedang Dipinjam</span><span>⏳</span></div>
+            <div class="stat-value" id="statTotalDipinjam">0</div>
+            <div class="stat-desc">Unit alat di luar laboratorium</div>
+          </div>
+          <div class="stat-card rose">
+            <div class="stat-header"><span>Peminjaman Menunggu</span><span>🔔</span></div>
+            <div class="stat-value" id="statTotalMenunggu">0</div>
+            <div class="stat-desc">Menunggu persetujuan petugas</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-header"><span>Denda Terkumpul</span><span>💰</span></div>
+            <div class="stat-value" id="statTotalDenda">Rp 0</div>
+            <div class="stat-desc">Total kas denda keterlambatan/rusak</div>
+          </div>
+        </div>
+
+        <!-- Recent Activities Card -->
+        <div class="card-container">
+          <div class="card-header-bar">
+            <h3 style="font-size: 1rem;">Transaksi Peminjaman Terkini</h3>
+            <button class="btn btn-outline btn-sm" onclick="switchView('peminjaman')">Lihat Semua</button>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="tableDashRecentLoans">
+              <thead>
+                <tr>
+                  <th>Kode Pinjam</th>
+                  <th>Peminjam</th>
+                  <th>Alat</th>
+                  <th>Jumlah</th>
+                  <th>Tgl Pinjam</th>
+                  <th>Rencana Kembali</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyDashRecent">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 2: KATALOG ALAT (Semua level) -->
+      <section class="view-section" id="viewKatalog" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Katalog Inventaris Alat</h2>
+            <p>Daftar seluruh peralatan laboratorium, IoT, jaringan, dan multimedia yang tersedia</p>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="card-container" style="padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+            <div style="flex: 1; min-width: 200px;">
+              <input type="text" class="form-control" id="searchKatalog" placeholder="Cari nama alat, kode, spesifikasi..." oninput="filterKatalog()">
+            </div>
+            <div style="width: 200px;">
+              <select class="form-control" id="filterKategoriKatalog" onchange="filterKatalog()">
+                <option value="0">Semua Kategori</option>
+              </select>
+            </div>
+            <div>
+              <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.85rem; cursor: pointer;">
+                <input type="checkbox" id="checkTersediaSaja" onchange="filterKatalog()"> Hanya yang Tersedia
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="tools-grid" id="toolsCatalogContainer">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      <!-- VIEW 3: KELOLA ALAT (CRUD - Admin & Petugas) -->
+      <section class="view-section" id="viewKelolaAlat" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Kelola Master Data Alat</h2>
+            <p>Tambah inventaris baru, mutasi stok, edit kondisi dan tarif denda</p>
+          </div>
+          <button class="btn btn-primary" id="btnTambahAlat" onclick="openTambahAlatModal()">+ Tambah Alat Baru</button>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tableKelolaAlat">
+              <thead>
+                <tr>
+                  <th>Kode</th>
+                  <th>Nama Alat</th>
+                  <th>Kategori</th>
+                  <th>Stok Total</th>
+                  <th>Stok Ada</th>
+                  <th>Kondisi</th>
+                  <th>Tarif Denda/Hari</th>
+                  <th>Lokasi</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyKelolaAlat">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 4: KELOLA KATEGORI (CRUD - Admin & Petugas) -->
+      <section class="view-section" id="viewKelolaKategori" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Kelola Kategori Alat</h2>
+            <p>Pengelompokan alat berdasarkan rumpun keahlian dan peruntukan</p>
+          </div>
+          <button class="btn btn-primary" id="btnTambahKategori" onclick="openTambahKategoriModal()">+ Tambah Kategori</button>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tableKelolaKategori">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nama Kategori</th>
+                  <th>Deskripsi Kategori</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyKelolaKategori">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 5: KELOLA PENGGUNA (CRUD - Admin) -->
+      <section class="view-section" id="viewKelolaUser" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Kelola Pengguna (3 Level: Admin, Petugas, Peminjam)</h2>
+            <p>Manajemen akun, kontrol hak akses (RBAC), dan aktivasi pengguna</p>
+          </div>
+          <button class="btn btn-primary" id="btnTambahUser" onclick="openTambahUserModal()">+ Tambah Pengguna</button>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tableKelolaUser">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Username</th>
+                  <th>Nama Lengkap</th>
+                  <th>Level / Role</th>
+                  <th>No. Telepon</th>
+                  <th>Alamat</th>
+                  <th>Status</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyKelolaUser">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 6: APPROVAL PEMINJAMAN (Petugas & Admin) -->
+      <section class="view-section" id="viewApproval" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Persetujuan Peminjaman Alat</h2>
+            <p>Verifikasi pengajuan dari siswa/peminjam sebelum barang fisik diserahkan</p>
+          </div>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tableApproval">
+              <thead>
+                <tr>
+                  <th>Kode Pinjam</th>
+                  <th>Peminjam</th>
+                  <th>Alat yang Dipinjam</th>
+                  <th>Jumlah</th>
+                  <th>Tgl Pinjam</th>
+                  <th>Rencana Kembali</th>
+                  <th>Keperluan</th>
+                  <th>Aksi Approval</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyApproval">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 7: SEMUA DATA PEMINJAMAN -->
+      <section class="view-section" id="viewPeminjaman" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2 id="titlePeminjamanList">Data Riwayat Peminjaman</h2>
+            <p>Daftar seluruh transaksi peminjaman, status barang, dan tenggat waktu pengembalian</p>
+          </div>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tablePeminjaman">
+              <thead>
+                <tr>
+                  <th>Kode Pinjam</th>
+                  <th>Peminjam</th>
+                  <th>Alat</th>
+                  <th>Jumlah</th>
+                  <th>Tgl Pinjam</th>
+                  <th>Rencana Kembali</th>
+                  <th>Status</th>
+                  <th>Petugas Approval</th>
+                  <th>Catatan</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPeminjaman">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 8: PENGEMBALIAN & DENDA (Petugas & Admin) -->
+      <section class="view-section" id="viewPengembalian" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Pengembalian Alat & Perhitungan Denda</h2>
+            <p>Pemeriksaan kondisi fisik barang kembali, kalkulasi hari keterlambatan, dan denda otomatis</p>
+          </div>
+          <button class="btn btn-primary" onclick="openProsesPengembalianModal()">+ Proses Pengembalian Alat</button>
+        </div>
+
+        <div class="card-container">
+          <div class="card-header-bar">
+            <h3 style="font-size: 1rem;">Daftar Transaksi Pengembalian Selesai</h3>
+          </div>
+          <div class="table-responsive">
+            <table class="data-table" id="tablePengembalian">
+              <thead>
+                <tr>
+                  <th>Kode Kembali</th>
+                  <th>Kode Pinjam</th>
+                  <th>Peminjam</th>
+                  <th>Alat</th>
+                  <th>Tgl Kembali</th>
+                  <th>Keterlambatan</th>
+                  <th>Denda Telat</th>
+                  <th>Denda Rusak</th>
+                  <th>Total Denda</th>
+                  <th>Status Bayar</th>
+                  <th>Aksi</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyPengembalian">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 9: LOG AKTIVITAS (Admin only) -->
+      <section class="view-section" id="viewLogs" style="display:none;">
+        <div class="page-header">
+          <div>
+            <h2>Audit Trail & Log Aktivitas Sistem</h2>
+            <p>Jejak rekam mutasi data, login, otorisasi, dan transaksi untuk akuntabilitas sistem</p>
+          </div>
+          <button class="btn btn-outline btn-sm" onclick="loadLogs()">🔄 Refresh Log</button>
+        </div>
+
+        <div class="card-container">
+          <div class="table-responsive">
+            <table class="data-table" id="tableLogs">
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Pengguna</th>
+                  <th>Peran</th>
+                  <th>Aksi</th>
+                  <th>Modul</th>
+                  <th>Detail Aktivitas</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyLogs">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- VIEW 10: CETAK LAPORAN UKK (Admin & Petugas) -->
+      <section class="view-section" id="viewLaporan" style="display:none;">
+        <div class="page-header no-print">
+          <div>
+            <h2>Laporan Transaksi Peminjaman & Pengembalian</h2>
+            <p>Filter periode laporan dan cetak dokumen resmi untuk berkas penilaian UKK</p>
+          </div>
+          <button class="btn btn-primary" onclick="window.print()">🖨️ Cetak Dokumen / Print PDF</button>
+        </div>
+
+        <!-- Filter Laporan (Hidden when printing) -->
+        <div class="card-container no-print" style="padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: flex-end;">
+            <div class="form-group" style="margin-bottom:0; flex:1; min-width:160px;">
+              <label class="form-label">Tanggal Mulai</label>
+              <input type="date" class="form-control" id="reportStartDate" value="2026-09-01">
+            </div>
+            <div class="form-group" style="margin-bottom:0; flex:1; min-width:160px;">
+              <label class="form-label">Tanggal Selesai</label>
+              <input type="date" class="form-control" id="reportEndDate" value="2026-09-30">
+            </div>
+            <div class="form-group" style="margin-bottom:0; flex:1; min-width:160px;">
+              <label class="form-label">Filter Status</label>
+              <select class="form-control" id="reportFilterStatus">
+                <option value="semua">Semua Status</option>
+                <option value="dipinjam">Sedang Dipinjam</option>
+                <option value="selesai">Selesai</option>
+                <option value="menunggu">Menunggu Approval</option>
+                <option value="ditolak">Ditolak</option>
+              </select>
+            </div>
+            <button class="btn btn-outline" onclick="loadReportData()">Terapkan Filter</button>
+          </div>
+        </div>
+
+        <!-- Report Content -->
+        <div class="card-container" id="reportPrintArea">
+          <div style="padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+            <div>
+              <strong id="reportDateRange">Periode: 01 September 2026 s/d 30 September 2026</strong>
+              <div style="font-size: 0.8rem; color: var(--text-muted);">Dicetak pada: <span id="reportPrintTimestamp"></span></div>
+            </div>
+            <div style="text-align: right;">
+              <div>Total Transaksi: <strong id="reportTotalTrx">0</strong></div>
+              <div>Total Denda: <strong id="reportTotalFine">Rp 0</strong></div>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table class="data-table" id="tableReportList">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th>Kode Pinjam</th>
+                  <th>Peminjam</th>
+                  <th>Alat</th>
+                  <th>Jumlah</th>
+                  <th>Tgl Pinjam</th>
+                  <th>Tgl Kembali (Rencana/Aktual)</th>
+                  <th>Status</th>
+                  <th>Total Denda</th>
+                </tr>
+              </thead>
+              <tbody id="tbodyReport">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Report Signatures for UKK Exam Examination -->
+        <div class="report-signature" style="display:none;" id="printSignatures">
+          <div class="signature-box">
+            <p>Mengetahui,<br>Kepala Laboratorium RPL</p>
+            <div class="signature-space"></div>
+            <p><strong>( Drs. H. Sukamto, M.T. )</strong><br>NIP. 19780512 200501 1 004</p>
+          </div>
+          <div class="signature-box">
+            <p>Petugas Inventaris / Programmer,<br>&nbsp;</p>
+            <div class="signature-space"></div>
+            <p><strong id="printSignerName">( Budi Santoso )</strong><br>Petugas Lab</p>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       MODAL DIALOGS
+       ======================================================================== -->
+
+  <!-- Modal 1: Login Custom Modal -->
+  <div class="modal-overlay" id="modalLogin">
+    <div class="modal-card" style="max-width: 400px;">
+      <div class="modal-header">
+        <h3>Login Pengguna</h3>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Username</label>
+          <input type="text" class="form-control" id="loginUsername" placeholder="admin / petugas / peminjam">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-control" id="loginPassword" placeholder="admin123 / petugas123 / peminjam123">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" style="width: 100%;" onclick="submitCustomLogin()">Masuk ke Sistem</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Tambah / Edit Alat -->
+  <div class="modal-overlay" id="modalAlat">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalAlatTitle">Tambah Alat Baru</h3>
+        <button class="modal-close" onclick="closeModal('modalAlat')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formAlatId">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Kode Alat *</label>
+            <input type="text" class="form-control" id="formAlatKode" placeholder="Contoh: ALT-010">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kategori *</label>
+            <select class="form-control" id="formAlatKategori">
+              <!-- Injected via JS -->
+            </select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Alat *</label>
+          <input type="text" class="form-control" id="formAlatNama" placeholder="Contoh: Osiloskop Digital Mini">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Stok Total *</label>
+            <input type="number" class="form-control" id="formAlatStok" min="1" value="5">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kondisi</label>
+            <select class="form-control" id="formAlatKondisi">
+              <option value="baik">Baik</option>
+              <option value="rusak_ringan">Rusak Ringan</option>
+              <option value="rusak_berat">Rusak Berat</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tarif Denda/Hari (Rp)</label>
+            <input type="number" class="form-control" id="formAlatDenda" value="5000">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lokasi Penyimpanan</label>
+          <input type="text" class="form-control" id="formAlatLokasi" value="Rak Lab 1">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Spesifikasi / Keterangan</label>
+          <textarea class="form-control" id="formAlatSpek" rows="2" placeholder="Spesifikasi teknis alat..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalAlat')">Batal</button>
+        <button class="btn btn-primary" onclick="saveAlat()">Simpan Data Alat</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Tambah / Edit Kategori -->
+  <div class="modal-overlay" id="modalKategori">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalKategoriTitle">Tambah Kategori Baru</h3>
+        <button class="modal-close" onclick="closeModal('modalKategori')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formKategoriId">
+        <div class="form-group">
+          <label class="form-label">Nama Kategori *</label>
+          <input type="text" class="form-control" id="formKategoriNama" placeholder="Contoh: Robotika & Mekatronika">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Deskripsi</label>
+          <textarea class="form-control" id="formKategoriDesc" rows="3" placeholder="Deskripsi rumpun alat..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalKategori')">Batal</button>
+        <button class="btn btn-primary" onclick="saveKategori()">Simpan Kategori</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Tambah / Edit Pengguna -->
+  <div class="modal-overlay" id="modalUser">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalUserTitle">Tambah Pengguna Baru</h3>
+        <button class="modal-close" onclick="closeModal('modalUser')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formUserId">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Username *</label>
+            <input type="text" class="form-control" id="formUserUsername" placeholder="username_siswa">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-control" id="formUserPassword" placeholder="******">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Nama Lengkap *</label>
+          <input type="text" class="form-control" id="formUserNama" placeholder="Nama lengkap siswa / petugas">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Level / Role *</label>
+            <select class="form-control" id="formUserRole">
+              <option value="peminjam">Peminjam (Siswa)</option>
+              <option value="petugas">Petugas Lab</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">No. Telepon</label>
+            <input type="text" class="form-control" id="formUserTelp" placeholder="08123456789">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Alamat / Kelas</label>
+          <textarea class="form-control" id="formUserAlamat" rows="2" placeholder="Kelas XII RPL 1"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalUser')">Batal</button>
+        <button class="btn btn-primary" onclick="saveUser()">Simpan Pengguna</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 5: Ajukan Peminjaman (Peminjam) -->
+  <div class="modal-overlay" id="modalAjukanPinjam">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Form Pengajuan Peminjaman Alat</h3>
+        <button class="modal-close" onclick="closeModal('modalAjukanPinjam')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Pilih Alat *</label>
+          <select class="form-control" id="formAjukanAlatId" onchange="updateAjukanAlatInfo()">
+            <!-- Injected via JS -->
+          </select>
+        </div>
+        <div id="ajukanStockInfo" style="font-size:0.8rem; color:var(--accent-cyan); margin-top:-0.5rem; margin-bottom:1rem;">
+          Stok tersedia: -
+        </div>
+        <div class="form-group">
+          <label class="form-label">Jumlah Pinjam *</label>
+          <input type="number" class="form-control" id="formAjukanJumlah" min="1" value="1">
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Tanggal Pinjam *</label>
+            <input type="date" class="form-control" id="formAjukanTglPinjam">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Rencana Kembali *</label>
+            <input type="date" class="form-control" id="formAjukanTglKembali">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Keperluan Praktik / Alasan Peminjaman *</label>
+          <textarea class="form-control" id="formAjukanKeperluan" rows="2" placeholder="Contoh: Praktik Pembuatan Sensor IoT"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalAjukanPinjam')">Batal</button>
+        <button class="btn btn-primary" onclick="submitAjukanPinjam()">Kirim Pengajuan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 6: Approval Peminjaman (Setujui / Tolak) -->
+  <div class="modal-overlay" id="modalApproval">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalApprovalTitle">Persetujuan Peminjaman</h3>
+        <button class="modal-close" onclick="closeModal('modalApproval')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="formApprovalId">
+        <input type="hidden" id="formApprovalAksi">
+        <div id="approvalItemDetails" style="background:var(--bg-surface-elevated); padding:1rem; border-radius:var(--radius-sm); margin-bottom:1rem; font-size:0.875rem;">
+          <!-- Injected via JS -->
+        </div>
+        <div class="form-group">
+          <label class="form-label">Catatan Petugas (Opsional)</label>
+          <textarea class="form-control" id="formApprovalCatatan" rows="2" placeholder="Pesan untuk peminjam..."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalApproval')">Batal</button>
+        <button class="btn btn-primary" id="btnConfirmApproval" onclick="submitApproval()">Konfirmasi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 7: Proses Pengembalian & Perhitungan Denda -->
+  <div class="modal-overlay" id="modalPengembalian">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Proses Pengembalian Alat & Hitung Denda</h3>
+        <button class="modal-close" onclick="closeModal('modalPengembalian')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">Pilih Transaksi Peminjaman *</label>
+          <select class="form-control" id="formKembaliPinjamId" onchange="calculateLiveFine()">
+            <!-- Injected via JS -->
+          </select>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label">Tanggal Kembali Aktual *</label>
+            <input type="date" class="form-control" id="formKembaliTanggal" onchange="calculateLiveFine()">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Kondisi Alat Saat Kembali *</label>
+            <select class="form-control" id="formKembaliKondisi" onchange="calculateLiveFine()">
+              <option value="baik">Baik (Lengkap & Normal)</option>
+              <option value="rusak_ringan">Rusak Ringan (Denda Rp 25.000)</option>
+              <option value="rusak_berat">Rusak Berat (Denda Rp 100.000)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Live Fine Preview Panel -->
+        <div style="background:var(--bg-surface-elevated); border:1px solid var(--border-color); border-radius:var(--radius-sm); padding:1rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>Jatuh Tempo Rencana:</span>
+            <strong id="finePlannedDate">-</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>Keterlambatan:</span>
+            <strong id="fineLateDays">0 Hari</strong>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:4px;">
+            <span>Denda Keterlambatan:</span>
+            <span id="fineLateAmount">Rp 0</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:8px;">
+            <span>Denda Kerusakan:</span>
+            <span id="fineDamageAmount">Rp 0</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; font-size:1.1rem; font-weight:700; border-top:1px dashed var(--border-color); padding-top:8px; color:var(--accent-rose);">
+            <span>Total Denda:</span>
+            <span id="fineTotalAmount">Rp 0</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Catatan Pengembalian</label>
+          <textarea class="form-control" id="formKembaliCatatan" rows="2" placeholder="Kondisi kelengkapan aksesoris, dll."></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('modalPengembalian')">Batal</button>
+        <button class="btn btn-success" onclick="submitPengembalian()">Selesaikan Pengembalian</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Client Script -->
+  <script src="/js/app.js"></script>
+</body>
+</html>

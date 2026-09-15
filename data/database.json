@@ -1,0 +1,325 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "nama_lengkap": "Administrator Utama",
+      "no_telepon": "081234567890",
+      "alamat": "Lab Komputer 1",
+      "role": "admin",
+      "status": "aktif",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 2,
+      "username": "petugas",
+      "nama_lengkap": "Budi Santoso (Petugas Lab)",
+      "no_telepon": "081234567891",
+      "alamat": "Ruang Petugas Inventaris",
+      "role": "petugas",
+      "status": "aktif",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 3,
+      "username": "peminjam",
+      "nama_lengkap": "Ahmad Dani (Siswa RPL)",
+      "no_telepon": "081234567892",
+      "alamat": "Kelas XII RPL 1",
+      "role": "peminjam",
+      "status": "aktif",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 4,
+      "username": "siswa2",
+      "nama_lengkap": "Siti Rahma (Siswi RPL)",
+      "no_telepon": "081234567893",
+      "alamat": "Kelas XII RPL 2",
+      "role": "peminjam",
+      "status": "aktif",
+      "created_at": "2026-09-15 15:52:16"
+    }
+  ],
+  "kategori": [
+    {
+      "id": 1,
+      "nama_kategori": "Elektronik & IoT",
+      "deskripsi": "Komponen mikrokontroler, sensor, kabel jumper, board ESP32/Arduino",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 2,
+      "nama_kategori": "Komputer & Jaringan",
+      "deskripsi": "Laptop praktik, Switch hub, router Mikrotik, crimping tool, LAN tester",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 3,
+      "nama_kategori": "Audio Visual",
+      "deskripsi": "Proyektor multimedia, kamera digital, mikrofon wireless, tripod",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 4,
+      "nama_kategori": "Pertukangan & Mekanik",
+      "deskripsi": "Solder listrik, multimeter digital, set obeng presisi, bor tangan",
+      "created_at": "2026-09-15 15:52:16"
+    }
+  ],
+  "alat": [
+    {
+      "id": 1,
+      "kode_alat": "ALT-001",
+      "nama_alat": "Arduino Uno R3 Starter Kit",
+      "kategori_id": 1,
+      "nama_kategori": "Elektronik & IoT",
+      "stok_total": 15,
+      "stok_tersedia": 14,
+      "kondisi": "baik",
+      "lokasi": "Rak A-1",
+      "spesifikasi": "Board ATmega328P + Kabel USB + Breadboard + 30 Sensor",
+      "tarif_denda_harian": 5000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 2,
+      "kode_alat": "ALT-002",
+      "nama_alat": "ESP32 NodeMCU Wi-Fi + BLE",
+      "kategori_id": 1,
+      "nama_kategori": "Elektronik & IoT",
+      "stok_total": 20,
+      "stok_tersedia": 20,
+      "kondisi": "baik",
+      "lokasi": "Rak A-2",
+      "spesifikasi": "Dual Core 240MHz, 4MB Flash, Wi-Fi 802.11 b/g/n",
+      "tarif_denda_harian": 5000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 3,
+      "kode_alat": "ALT-003",
+      "nama_alat": "Crimping Tool RJ45 CAT6",
+      "kategori_id": 2,
+      "nama_kategori": "Komputer & Jaringan",
+      "stok_total": 10,
+      "stok_tersedia": 10,
+      "kondisi": "baik",
+      "lokasi": "Kotak Alat Jaringan 1",
+      "spesifikasi": "Tang crimping profesional 3 in 1 untuk kabel UTP CAT5e/CAT6",
+      "tarif_denda_harian": 3000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 4,
+      "kode_alat": "ALT-004",
+      "nama_alat": "Digital LAN Cable Tester",
+      "kategori_id": 2,
+      "nama_kategori": "Komputer & Jaringan",
+      "stok_total": 8,
+      "stok_tersedia": 8,
+      "kondisi": "baik",
+      "lokasi": "Kotak Alat Jaringan 1",
+      "spesifikasi": "Tester RJ45 / RJ11 dengan indikator LED 8 pin",
+      "tarif_denda_harian": 3000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 5,
+      "kode_alat": "ALT-005",
+      "nama_alat": "Router MikroTik RB750r2 (hEX lite)",
+      "kategori_id": 2,
+      "nama_kategori": "Komputer & Jaringan",
+      "stok_total": 12,
+      "stok_tersedia": 12,
+      "kondisi": "baik",
+      "lokasi": "Lemari Server",
+      "spesifikasi": "5 Port Fast Ethernet, RouterOS Level 4",
+      "tarif_denda_harian": 10000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 6,
+      "kode_alat": "ALT-006",
+      "nama_alat": "Proyektor Epson EB-X500",
+      "kategori_id": 3,
+      "nama_kategori": "Audio Visual",
+      "stok_total": 4,
+      "stok_tersedia": 4,
+      "kondisi": "baik",
+      "lokasi": "Ruang Multimedia",
+      "spesifikasi": "3600 Lumens, Resolusi XGA 1024x768, Port HDMI/VGA",
+      "tarif_denda_harian": 25000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 7,
+      "kode_alat": "ALT-007",
+      "nama_alat": "Solder Listrik Digital 60W",
+      "kategori_id": 4,
+      "nama_kategori": "Pertukangan & Mekanik",
+      "stok_total": 10,
+      "stok_tersedia": 10,
+      "kondisi": "baik",
+      "lokasi": "Meja Praktik Solder",
+      "spesifikasi": "Suhu adjustable 200-450C dengan dudukan dan timah",
+      "tarif_denda_harian": 5000.0,
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 8,
+      "kode_alat": "ALT-008",
+      "nama_alat": "Multimeter Digital Auto-Ranging",
+      "kategori_id": 4,
+      "nama_kategori": "Pertukangan & Mekanik",
+      "stok_total": 6,
+      "stok_tersedia": 6,
+      "kondisi": "baik",
+      "lokasi": "Meja Pengukuran",
+      "spesifikasi": "Pengukur tegangan AC/DC, resistansi, kontinuitas buzzer",
+      "tarif_denda_harian": 7500.0,
+      "created_at": "2026-09-15 15:52:16"
+    }
+  ],
+  "peminjaman": [
+    {
+      "id": 1,
+      "kode_pinjam": "PINJAM-20260901-001",
+      "user_id": 3,
+      "peminjam_nama": "Ahmad Dani (Siswa RPL)",
+      "peminjam_username": "peminjam",
+      "alat_id": 3,
+      "nama_alat": "Crimping Tool RJ45 CAT6",
+      "kode_alat": "ALT-003",
+      "jumlah": 2,
+      "tanggal_pengajuan": "2026-09-01 08:30:00",
+      "tanggal_pinjam": "2026-09-01",
+      "tanggal_kembali_rencana": "2026-09-04",
+      "tanggal_kembali_aktual": "2026-09-04",
+      "status": "selesai",
+      "keperluan": "Praktik Uji Coba Jaringan LAN",
+      "disetujui_oleh": 2,
+      "nama_petugas": "Budi Santoso (Petugas Lab)",
+      "catatan_petugas": "Gunakan alat dengan hati-hati",
+      "total_denda": 0.0,
+      "created_at": "2026-09-01 08:30:00"
+    },
+    {
+      "id": 2,
+      "kode_pinjam": "PINJAM-20260910-002",
+      "user_id": 3,
+      "peminjam_nama": "Ahmad Dani (Siswa RPL)",
+      "peminjam_username": "peminjam",
+      "alat_id": 1,
+      "nama_alat": "Arduino Uno R3 Starter Kit",
+      "kode_alat": "ALT-001",
+      "jumlah": 1,
+      "tanggal_pengajuan": "2026-09-10 09:15:00",
+      "tanggal_pinjam": "2026-09-10",
+      "tanggal_kembali_rencana": "2026-09-14",
+      "tanggal_kembali_aktual": null,
+      "status": "dipinjam",
+      "keperluan": "Praktik Proyek IoT Rumah Pintar",
+      "disetujui_oleh": 2,
+      "nama_petugas": "Budi Santoso (Petugas Lab)",
+      "catatan_petugas": "Kembalikan sebelum jam 15.00",
+      "total_denda": 0.0,
+      "created_at": "2026-09-10 09:15:00"
+    }
+  ],
+  "detail_peminjaman": [
+    {
+      "id": 1,
+      "peminjaman_id": 1,
+      "alat_id": 3,
+      "jumlah": 2,
+      "kondisi_saat_pinjam": "baik",
+      "kondisi_saat_kembali": "baik",
+      "denda_kerusakan": 0.0
+    },
+    {
+      "id": 2,
+      "peminjaman_id": 2,
+      "alat_id": 1,
+      "jumlah": 1,
+      "kondisi_saat_pinjam": "baik",
+      "kondisi_saat_kembali": "baik",
+      "denda_kerusakan": 0.0
+    }
+  ],
+  "pengembalian": [
+    {
+      "id": 1,
+      "kode_kembali": "KEMBALI-20260904-001",
+      "peminjaman_id": 1,
+      "kode_pinjam": "PINJAM-20260901-001",
+      "user_id": 3,
+      "nama_peminjam": "Ahmad Dani (Siswa RPL)",
+      "petugas_id": 2,
+      "nama_petugas": "Budi Santoso (Petugas Lab)",
+      "nama_alat": "Crimping Tool RJ45 CAT6",
+      "jumlah": 2,
+      "tanggal_kembali": "2026-09-04",
+      "hari_terlambat": 0,
+      "denda_keterlambatan": 0.0,
+      "denda_kerusakan": 0.0,
+      "total_denda": 0.0,
+      "status_pembayaran": "tidak_ada_denda",
+      "catatan": "Alat kembali tepat waktu dalam keadaan lengkap dan baik.",
+      "created_at": "2026-09-04 14:00:00"
+    }
+  ],
+  "log_aktivitas": [
+    {
+      "id": 1,
+      "user_id": 1,
+      "username": "admin",
+      "role": "admin",
+      "aksi": "INIT",
+      "modul": "SISTEM",
+      "detail": "Inisialisasi basis data aplikasi peminjaman alat UKK",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 2,
+      "user_id": 2,
+      "username": "petugas",
+      "role": "petugas",
+      "aksi": "APPROVAL",
+      "modul": "PEMINJAMAN",
+      "detail": "Menyetujui peminjaman PINJAM-20260901-001",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 3,
+      "user_id": 2,
+      "username": "petugas",
+      "role": "petugas",
+      "aksi": "VERIFIKASI",
+      "modul": "PENGEMBALIAN",
+      "detail": "Memverifikasi pengembalian KEMBALI-20260904-001 (Total Denda: Rp 0)",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-09-15 15:52:16"
+    },
+    {
+      "id": 4,
+      "user_id": 1,
+      "username": "admin",
+      "role": "admin",
+      "aksi": "LOGIN",
+      "modul": "AUTH",
+      "detail": "Pengguna 'admin' berhasil login sebagai 'admin'",
+      "ip_address": "127.0.0.1",
+      "created_at": "2026-09-15 15:52:36"
+    }
+  ],
+  "next_user_id": 5,
+  "next_kategori_id": 5,
+  "next_alat_id": 9,
+  "next_peminjaman_id": 3,
+  "next_detail_id": 3,
+  "next_pengembalian_id": 2,
+  "next_log_id": 5
+}

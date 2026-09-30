@@ -68,7 +68,17 @@ Pada soal UKK RPL Paket 1 (KM25.4.1.1), peserta ditugaskan membangun **Aplikasi 
 
 ## 3. Perancangan Basis Data (ERD, DDL, Triggers, Functions & Transaksi)
 
-### A. Entity Relationship Diagram (ERD)
+### A. Entity Relationship Diagram (ERD) - MySQL Workbench Standard
+Berikut visualisasi relasi 7 tabel ternormalisasi 3NF bergaya **MySQL Workbench Modeler**:
+
+![ERD Diagram MySQL Workbench](assets/erd_diagram.png)
+
+> 📘 **Dokumentasi Lengkap & Slide Presentasi:**
+> - Panduan Detail & Kamus Data: [ERD.md](file:///d:/belajar%20ukk%20rust/ukk1/ERD.md)
+> - Berkas Presentasi Sidang: [Presentasi_Peminjaman_Alat_UKK1.pptx](file:///d:/belajar%20ukk%20rust/ukk1/Presentasi_Peminjaman_Alat_UKK1.pptx)
+> - Kanvas HTML Interaktif: [assets/erd_workbench.html](file:///d:/belajar%20ukk%20rust/ukk1/assets/erd_workbench.html)
+
+#### Diagram Konseptual Relasi (Mermaid):
 ```mermaid
 erDiagram
     USERS ||--o{ PEMINJAMAN : "mengajukan"
